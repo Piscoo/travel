@@ -1,0 +1,94 @@
+// 初始化全局样式
+@import '//at.alicdn.com/t/font_955519_mwt66mzo53l.css';
+html,body {
+  background-color: #fbf9fe;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+body {
+  font-size: 12px;
+}
+a {
+  color: #e81b00;
+}
+li {
+  list-style: none;
+}
+.row {
+  padding: 10px 15px
+}
+.block {
+  display: block;
+}
+.hidden {
+  display: none
+}
+.visibility-none {
+  height: 1px;
+  visibility: hidden;
+}
+.no-border {
+  .weui-cells:before,
+  .weui-cells:after{
+    content: none;
+  }
+}
+.cover-img {
+  background: transparent center no-repeat;
+  background-size: cover;
+  &.full {
+    background-size: contain;
+  }
+}
+.one-line {
+  overflow:hidden;
+  white-space:nowrap;
+  max-width:100%;
+  text-overflow:ellipsis
+}
+.flex {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  color: #333;
+  &.wrap {
+    flex-wrap: wrap;
+  }
+  &.space-between {
+    justify-content: space-between;
+  }
+  &.align-center {
+    align-items: center;
+  }
+  .grow {
+    flex-grow: 1
+  }
+  .top {
+    align-self: flex-start;
+  }
+  .align-center {
+    align-self: center;
+  }
+  .no-shrink {
+    flex-shrink: 0
+  }
+}
+.filter {
+  filter: blur(7px);
+}
+#app .vux-header .vux-header-left .left-arrow:before{
+  border-color: #666
+}
+.delete {
+  font-size: 0.9em;
+  text-decoration-line: line-through;
+}
+.gray {
+  color: gray;
+}
+.weui-tab__panel {
+  >.router-view {
+    min-height: calc(~"100% + 1px")
+  }
+}

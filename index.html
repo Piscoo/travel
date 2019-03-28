@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+	<title>山河特旅</title>
+	<!-- <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=GUFza4N1WpowDcDOYyYlbZKhoIBKRNLk"></script> -->
+	<link id="favicon" href="./favicon.ico" rel="icon" type="image/x-icon">
+	<link rel="stylesheet" href="//at.alicdn.com/t/font_950376_pgzs50uapur.css" />
+	<noscript>
+		您的浏览器不支持javascript,请更换浏览器访问
+	</noscript>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 31.25 + 'px';
+		window.versionnow = "v1.3.6" // 当前发布的版本号
+		window.getWechatCode = function () { // 微信登录获取code
+			if (window.getWechatCode.start) return
+
+			window.getWechatCode.start = true
+			var locationHref = window.location.href // 当前url地址
+			var ZcHash = window.location.hash // 访问地址的hash
+			var baseHref = locationHref.replace(/(.html).*/, '$1') // 项目基础路径
+			var redirect_uri = window.encodeURI(baseHref)
+			var wechatUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx17d9680c7613a989&redirect_uri=" + redirect_uri + "&response_type=code&scope=snsapi_userinfo&state=''#wechat_redirect";
+			window.localStorage.clear() // 初始化
+			window.localStorage.setItem('replaceUrl', baseHref + '?' + ZcHash) // 记录最终指向地址
+			window.location.replace(wechatUrl)
+		}
+		!function () {
+			// 最终地址格式： 'http://www.shanhetelv.com/fundrais/index.html?' + [单页应用hash]
+			// 登录： 记录要跳转的地址 => 获取微信code => code换取token => 重定向到要跳转的地址
+			// 强制登录： 本地有版本号&版本号与线上版本号不同 => 记录要跳转的地址 => 获取微信code => code换取token => 重定向到要跳转的地址
+			// 已登录【已有token】： 地址处理为指定格式 => 重定向到要跳转的地址
+
+			var version = window.localStorage.getItem('version') || '' // 本地版本号
+			var zcToken = (localStorage.getItem("zcToken") || '').replace('undefined') // 登录成功后的token
+			var locationHref = window.location.href // 当前url地址
+			window.ZcCode = locationHref.replace(/.*?code=([^&]*).*|.*($)/, '$1') // 微信授权code
+
+			if ( /debugger/.test(locationHref) ) return // 测试用 跳过授权
+			if ( window.ZcCode ) return // 微信code换取token
+			if ( zcToken ) { // 已登录
+				if ( version && zcToken && version !== window.versionnow ) { // 推送版本号强制更新 前提，有版本号，已有token 版本号为旧版本号
+					return window.getWechatCode()
+				}
+				if (/&|from/.test(locationHref)) { // 去除微信分享携带的参数
+					window.location.href = locationHref.replace(/\?[^#]*/, '?').replace(/\?.*#/, '?#')
+				} else if (!window.sessionStorage.getItem('session')) {
+					window.sessionStorage.setItem('session', '1')
+					let newHref = location.href.replace(/#|\?#/, '?#')
+					location.replace(newHref)
+				}
+			} else { // 微信登录获取code
+				window.getWechatCode()
+			}
+		}()
+	</script>
+</head>
+
+<body>
+	<div id="app-box"></div>
+	<!-- built files will be auto injected -->
+</body>
+<script>
+	document.body.addEventListener("blur", function (e) {
+		setTimeout(() => {
+			window.scrollTo(0, 0);
+		}, 300);
+	}, true);
+	// document.body.addEventListener("focus", function (e) {
+	//   if (/Android/i.test(navigator.userAgent)) {
+	//     setTimeout(() => {
+	//       document.getElementById('vux_view_box_body').scrollTop = document.getElementById('vux_view_box_body').scrollTop + 60
+	//     }, 1000);
+	//   }
+	// }, true);
+</script>
+</html>
