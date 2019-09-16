@@ -44,6 +44,13 @@ const config = {
 	  path: '/index/:activityType/:activityId/teaminfo'
 	}
   }, {
+	component: () => import('src/page/index/totalrange.vue'),
+	name: 'totalrange',
+	title: '总榜',
+	base: {
+	  path: '/index/:activityType/:activityId/totalrange'
+	}
+  }, {
 	component: () => import('src/page/index/phone.vue'),
 	name: 'phone',
 	title: '绑定手机',

@@ -14,7 +14,7 @@ var vuxLocales = require('./locales/global_locales.yml')
 var infiniteScroll =  require('vue-infinite-scroll')
 
 const ipaddr = "http://www.shanhetelv.com/fundrais/"
-// const ipaddr = "http://192.168.1.119:8080/social/"
+// const ipaddr = "http://192.168.1.120:8080/social/"
 
 // 全局变量声明
 window.$ = {}
@@ -162,7 +162,7 @@ const responseError = function (error) {    // axios 返回错误
 const http = Vue.http // axios默认配置
 http.interceptors.request.use(request, requiresError)       // Add a request interceptor
 http.interceptors.response.use(interceptors, responseError) // Add a response interceptor
-
+ 
 const httpOne = Vue.http.create(baseAxiosConfig)            // http配置
 httpOne.interceptors.request.use(request, requiresError)
 httpOne.interceptors.response.use(interceptors, responseError)
@@ -367,7 +367,7 @@ share.config(share.configurl)
  * 表单数据 在data[key] 中 不存在无法检测 返回false
  * @param  {[string]} key [ref名称、data，默认为 form]
  * @return {[boolean]}     [是否通过验证]
- */
+**/
 Vue.prototype.formValid = function (key = 'form') {
 	const requires = typeof this.requires === 'object' ? this.requires[key] || this.requires : []
 

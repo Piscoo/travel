@@ -1,8 +1,10 @@
 export default {
   state: {
     tabbar: 0, // tabbar状态
-    pageTitle: 0, // 页面标题
+    // pageTitle: 0, // 页面标题
+    pageTitle: [], // 页面标题
     showBack: false, // 导航是否显示返回
+    showTitleImg: false, // 导航是否显示喇叭图片
     isHeader: true, // 导航是否显示返回
     showMore: false, // 导航是否显示更多
     onClickMore () { return false }, // 更多事件
@@ -25,6 +27,9 @@ export default {
     },
     updateShowBack (state, payload) {
       state.showBack = payload.showBack
+    },
+    updateShowTitleImg (state, payload) {
+      state.showTitleImg = payload.showTitleImg
     },
     updateClickMore (state, payload) {
       state.onClickMore = payload ? payload.onClickMore : function () { return false }

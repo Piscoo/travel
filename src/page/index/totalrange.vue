@@ -1,5 +1,5 @@
 <template>
-    <div class="teaminfo">
+    <div class="totalrange">
 		<div class="cover-img" :style="'background-image: url('+teamlogo+')'"></div>
 		<tab :line-width="3" active-color="#F8C301" v-model="index" :custom-bar-width="getBarWidth">
 			<tab-item class="vux-center" v-for="(item, index) in teamList" :key="index" @on-item-click="changeCode(index)">{{item}}</tab-item>
@@ -13,10 +13,11 @@
 					<div class="right">
 						<div class="namemoney">
 							<span class="name one-line" :class="index <= 2? 'active' : ''">{{index+1}}.{{item.userName}}</span>
-							<span class="money no-shrink">{{item.supportAmount}}元</span>
+							<span class="money no-shrink" v-show="typeCode == 0">{{item.supportAmount}}元</span>
+							<span class="money no-shrink" v-show="typeCode == 1">{{useTime}}</span><!-- 速度榜使用的时间 -->
 						</div>
 						<div class="teamName">战队：{{item.teamName}}</div>
-						<div class="finish"><span class="progress">已完成：{{item.supportCountPercent}}%</span><span class="num">支持人数：{{item.supportCount}}</span></div>
+						<div class="finish"><span class="progress" v-show="typeCode != 2">已完成：{{item.supportCountPercent}}%</span><span class="num">支持人数：{{item.supportCount}}</span></div>
 					</div>
 				</div>
 			</div>
@@ -26,7 +27,7 @@
 <script>
 	import { Tab, TabItem } from "vux";
 	export default {
-	  name: "teaminfo",
+	  name: "totalrange",
 	  components: { Tab, TabItem },
 	  beforeCreate() {
 	    this.$store.commit("updateTabbar", { tabbar: 0 });
@@ -44,15 +45,16 @@
 		loadMore: function() {
 	      this.getSupportNum()
 	    },
+	    // 总榜信息
 	  	getSupportNum(pageNo) {
 	  		const pageNum = pageNo || this.pageNum
 	  		this.busy = true
 	  		this.ajax({
 	  			method: "post",
-	  			url: "/app/activities/count",
+	  			url: "/app/activities/genera",
 	  			data: {
 	  				activityId: this.activityId,
-	  				activityCountTypeCode: this.typeCode,
+	  				generaTypeCode: this.typeCode,
 	  				pageNum,
 	  				pageSize: this.pageSize
 	  			},
@@ -62,6 +64,15 @@
 	  			success: res => {
 	  				if (res.data.list) {
 	  					this.pageNum = pageNum + 1
+	  					if(this.typeCode == 1) {
+	  						res.data.list.map(i => {
+	  							const day = parseInt(i.finishTime/60/24)
+	  							const leftHourTime = i.finishTime - day*24*60
+	  							const hour = parseInt(leftHourTime/60)
+	  							const minutes = leftHourTime%60
+	  							this.useTime = `${day}天${hour}小时${minutes}分钟`
+	  						})
+	  					}
 	  					this.supportList = this.supportList.concat(res.data.list || [])
 	  					if (pageNum >= res.data.totalPage ) {
 	  						this.busy = true
@@ -79,9 +90,13 @@
 	  		});
 	  	},
 	  	changeCode(index) {
-	  		this.typeCode = index
-	  		this.supportList = []
-	  		this.getSupportNum(1)
+	  		if(this.typeCode == index) {
+	  			return
+	  		} else {
+	  			this.typeCode = index
+		  		this.supportList = []
+		  		this.getSupportNum(1)
+	  		}
 	  	},
 	  	//点击头像前往对应用户的活动
 		toHisAct(id) {
@@ -104,17 +119,18 @@
 			supportList: [],
 	    	teamlogo: require('~assets/pisco/teamlogo.png'),
 	    	itemlogo: require('~assets/kiw/avatar.jpeg'),
-	    	teamList: ['人气榜', '速度榜', '金额榜'],
+	    	teamList: ['人气榜', '速度榜', '团队榜'],
 	    	index: 0,
 	    	getBarWidth: function(index) {
 	    		return 55 / 12 + "rem";
-	    	}
+	    	},
+	    	useTime: ''
 	    };
 	  }
 	};
 </script>
 <style lang="less" scoped>
-	.teaminfo {
+	.totalrange {
 		.cover-img {
 			width: 100%;
 			height:12.17rem;
@@ -164,7 +180,7 @@
 					    text-overflow: ellipsis;
 					}
 					.money {
-						font-size:1.42rem;
+						font-size:1.3rem;
 						font-weight:500;
 						color:rgba(255,0,0,1);
 						flex-shrink: 0;

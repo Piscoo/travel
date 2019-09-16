@@ -11,7 +11,9 @@
 			</div>
 			<div class="water" v-show="showWater"><img src="~assets/pisco/water.png" alt=""></div>
 		</div>
-		<div class="supportdecl" v-if="detailInfo.type == 6"><div class="words"><span>战队宣言：</span>{{detailInfo.supportDecl}}</div></div>
+		<div class="supportdecl" v-if="detailInfo.type == 6">
+			<div class="words"><span>战队宣言：</span>{{detailInfo.supportDecl}}</div>
+		</div>
 		<div class="actionInfo">
 			<div class="actionName">{{detailInfo.title}}</div>
 			<div class="actionTime">{{detailInfo.startTime}}~{{detailInfo.endTime}}</div>
@@ -71,17 +73,18 @@
 			<!-- 活动详情 -->
 			<div class="actiondetail" ref="elActiondetail" v-show="index=== 0" :class="showActiondetail ? 'auto' : ''">
 				<div class="dec" v-html="detailInfo.details"></div>
-				<div class="showmore" v-show="actiondetailBtn" @click="showActiondetail = !showActiondetail"><div style="margin:0 1rem;background:rgba(0,0,0,0.36);">{{showActiondetail ? '收起' : '点击查看更多'}}</div></div>
+				<div class="showmore" v-show="actiondetailBtn" @click="showActiondetail = !showActiondetail"><div style="margin:0 1rem;background:rgba(0,0,0,0.36);font-size: 1.5rem;font-weight: bold;">{{showActiondetail ? '收起' : '点击查看更多'}}</div></div>
 			</div>
 			<!-- 报名须知 -->
 			<div class="joinnotice" ref="elJoinnotice" v-show="index===1" :class="showJoinNotice ? 'auto' : ''">
 				<div class="dec" v-html="detailInfo.joinNotice"></div>
-				<div class="showmore" v-show="joinnoticeBtn" @click="showJoinNotice = !showJoinNotice"><div style="margin:0 1rem;background:rgba(0,0,0,0.36);">{{showJoinNotice ? '收起' : '点击查看更多'}}</div></div>
+				<div class="showmore" v-show="joinnoticeBtn" @click="showJoinNotice = !showJoinNotice"><div style="margin:0 1rem;background:rgba(0,0,0,0.36);font-size: 1.5rem;font-weight: bold;">{{showJoinNotice ? '收起' : '点击查看更多'}}</div></div>
 			</div>
 			<!-- 发起人介绍 -->
 			<div class="group" v-show="index===2" ref="elIntroduction" :class="showIntroduction ? 'auto' : ''">
+				<!-- <div class="dec" v-html="detailInfo.joinNotice"></div> -->
 				<div class="dec" v-html="detailInfo.introduction"></div>
-				<div class="showmore" v-show="introBtn" @click="showIntroduction = !showIntroduction"><div style="margin:0 1rem;background:rgba(0,0,0,0.36);">{{showIntroduction ? '收起' : '点击查看更多'}}</div></div>
+				<div class="showmore" v-show="introBtn" @click="showIntroduction = !showIntroduction"><div style="margin:0 1rem;background:rgba(0,0,0,0.36);font-size: 1.5rem;font-weight: bold;">{{showIntroduction ? '收起' : '点击查看更多'}}</div></div>
 			</div>
 			<!-- 即时感言以及评论列表暂时隐藏 -->
 		</div>
@@ -91,23 +94,44 @@
 		</div>
 		<div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="20">
 			<div class="judges">
-				<div class="judgement" v-for="item in judgeList" @click="tomessage" v-if="filitjudge(item.userNo, item.supportAmount)">
+				<div class="judgement" v-for="(item, index) in judgeList" :key="index" v-if="filitjudge(item.userNo, item.supportAmount)">
 					<div class="cover-img" :style="'background-image: url(' + item.headUrl + ')'"></div>
 					<div class="right">
 						<div class="name">{{item.userName}} <span class="eva-right" v-show="item.supportAmount">支持：{{item.supportAmount}}元</span></div>
 						<div class="content">{{item.comment}}</div>
-						<div class="time">{{item.createTime}}</div>
+						<div class="reply" v-for="reply in item.ratingReplyVoList">
+							<span class="replyname">{{reply.userName}}：</span><span class="replycontent">{{reply.comment}}</span>
+						</div>
+						<form ref="formMsg">
+							<div class="answer" v-show="showInput==index?true:false">
+								<span>{{localUserName}}：</span>
+								<input type="text" v-model="formMsg.answerContent[index]" id="inputreply" />
+							</div>
+						</form>
+						<div class="time">
+							<span>{{item.createTime}}</span>
+							<span>
+								<span class="cancel" @click="cancelInput(index)" v-show="showInput==index">取消</span>
+								<label for="inputreply"><span @click="replyBack(item.id, index)">回复</span></label>
+							</span>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 		<div class="rightitem">
-			<div class="rightimg">
-				<img src="~assets/pisco/team.png" alt @click="team">
+			<div class="rightimg2" @click="toTotalRank">
+				<img src="~assets/pisco/range.png" alt>
+				<div class="name">总榜</div>
 			</div>
-			<div class="rightimg2">
+			<div class="rightimg" v-if="detailInfo.type == 6" @click="team">
+				<img src="~assets/pisco/team1.png" alt>
+				<div class="name">团队榜</div>
+			</div>
+			<!-- 返回顶部，暂时隐藏 -->
+			<!-- <div class="rightimg2">
 				<img src="~assets/pisco/totop.png" alt @click="backTop" >
-			</div>
+			</div> -->
 		</div>
 		<!-- 支持好友弹窗部分 -->
 		<div v-transfer-dom>
@@ -238,7 +262,7 @@
 			 * laodMore   加载更多
 			*/
 			loadMore: function() {
-				this.getJudge()
+				// this.getJudge()
 			},
 			/**
 			 * [filitjudge 留言过滤活动发起者支持自己]
@@ -259,14 +283,14 @@
 				this.showmember = false
 			},
 			// 前往所有评论列表
-			tomessage () {
-				this.$router.push({
-					name: "allmessage",
-					params: {
-						activityId: this.activityId
-					}
-				});
-			},
+			// tomessage () {
+			// 	this.$router.push({
+			// 		name: "allmessage",
+			// 		params: {
+			// 			activityId: this.activityId
+			// 		}
+			// 	});
+			// },
 			// 取消发起活动
 			cancel () {
 				this.$vux.confirm.show({
@@ -318,10 +342,13 @@
 						} else {
 							this.showWater = false
 						}
+						this.$store.commit("updateShowTitleImg", { showTitleImg:  true})
 						let detailInfo =  res.data
 						const title = detailInfo.teamName ? detailInfo.teamName + '战队活动' : '官方活动'
 						document.title = title
-						this.$store.commit('updatePageTitle', { pageTitle: title })
+						// const newtitle = this.activityType == 6 ? `${detailInfo.supportCountTotal || 0}人支持 ${detailInfo.followCountTotal || 0}人关注` : `${detailInfo.supportCount || 0}人支持  ${detailInfo.followCount || 0}人关注`
+						const newtitle = this.activityType == 6 ? [`${detailInfo.supportCountTotal || 0}人支持`,  `${detailInfo.followCountTotal || 0}人关注`] : [`${detailInfo.supportCount || 0}人支持 `, `${detailInfo.followCount || 0}人关注`]
+						this.$store.commit('updatePageTitle', { pageTitle: newtitle })
 						detailInfo.userVo = detailInfo.userVo || {}
 						this.detailInfo = detailInfo
 						this.detailInfo.detailsImgPath = JSON.parse(res.data.detailsImgPath) && JSON.parse(res.data.detailsImgPath)[0]
@@ -333,6 +360,8 @@
 						}
 						const teamName = detailInfo.teamName?`【${detailInfo.teamName}】` : ''
 						this.teamName = teamName
+
+						// 分享配置
 						this.share({
 						    title : `${teamName} ${detailInfo.title}`,
 						    link : 'http://' + location.host + '/fundrais/index.html?' + location.hash,
@@ -381,24 +410,59 @@
 					},
 					success: res => {
 						if (res.data) {
-							this.pageNum = this.pageNum + 1
 							res.data.list.forEach( item => {
 								//支持金额显示小数点后两位
 								if (item.supportAmount) {
 									item.supportAmount = item.supportAmount.toFixed(2)
 								}
 							})
-							this.judgeList = this.judgeList.concat(res.data.list|| [])
-							if (pageNum >= res.data.totalPage) {
+							this.judgeList = res.data.list|| []
+							if (pageNum > res.data.totalPage) {
 								this.busy = true
 							} else {
 								this.busy = false
+								this.pageNum = this.pageNum + 1
 							}
 						} else {
 							this.busy = true
 						}
 					}
 				});
+			},
+			//回复评论
+			replyBack(id,index) {
+				if (this.showInput !== index) {
+					this.showInput = index
+				} else {
+					this.pid = id
+					if (this.formMsg.answerContent[index]) {
+						this.ajax({
+							method: 'post',
+							url: '/app/user/add-activity-rating',
+							data: {
+								comment: this.formMsg.answerContent[index],
+								activityId: this.activityId,
+								pid: this.pid,
+								type: 2
+							},
+							success: res => {
+								if (res.code === 0) {
+									this.$vux.toast.text("回复成功")
+									this.showInput = -1
+									this.formMsg.answerContent[index] = ''
+									this.getJudge(1)
+								}
+							}
+						})
+					} else {
+						this.$vux.toast.text("回复内容不能为空！")
+					}
+				}
+			},
+			//取消回复
+			cancelInput(index) {
+				this.showInput = -1
+				this.formMsg.answerContent[index] = ''
 			},
 			// 前往团队榜
 			team() {
@@ -409,12 +473,24 @@
 					}
 				})
 			},
+			// 前往总榜 
+			toTotalRank() {
+				const activityId = this.activityType == 6 ? this.detailInfo.originalActivityId : this.activityId
+				this.$router.push({
+					name: "totalrange",
+					params: {
+						activityId
+					}
+				})
+			},
+
 			getUserInfo() {
 				this.ajax({
 					method: 'get',
 					url: '/app/user',
 					success: res => {
 						this.localUserHead = res.data.headUrl
+						this.localUserName = res.data.userName
 					}
 				})
 			},
@@ -489,8 +565,15 @@
 								if (res === true) {
 									//支付成功
 									this.showSupport = false
-									this.$vux.toast.text("支付成功")
-									this.reload()
+									this.$vux.toast.show({
+										type: 'text',
+										text: `感恩您的支持 ，我一定全力以赴完成${this.detailInfo.title}！也邀请您一同并肩而行。`,
+										time: 3000,
+										width: "20rem"
+									})
+									setTimeout(() => {
+										this.reload()
+									}, 3000)
 								} else {
 									//支付失败
 									// this.$vux.toast.text(res.msg)
@@ -579,9 +662,11 @@
 				})
 			},
 			// 回到顶部
-			backTop(){
-				this.$emit('backTop')
-			}
+			// backTop(){
+			// 	this.$emit('backTop')
+			// }
+			
+
 			// //判断是否关注公众号
 			// followTest() {
 			// 	location.href='https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=Mzg4MTAxMTU2Nw==&scene=124#wechat_redirect'
@@ -590,6 +675,7 @@
 		beforeCreate() {
 			this.$store.commit("updateTabbar", { tabbar: -1 });
 			this.$store.commit("updateShowBack", { showBack: true });
+			// this.$store.commit("updateShowTitleImg", { showTitleImg:  true})
 			// this.$store.commit("updateIsHfolloweader", { isHeader: false }); // 显示头部
 			this.$nextTick ( () => {
 				this.activityId = this.$route.params.activityId;
@@ -597,19 +683,22 @@
 				this.getActivityDetail();
 				this.getJudge();
 				this.getsupport();
+				this.getUserInfo();
 				// this.isfollowed = true
+				// this.$store.commit("updatePageTitle", { pageTitle:  document.title = typeToText[this.activityType - 2]})
 				this.ajax({
-		      method: "get",
-		      url: '/app/wechat/follow?openid=',
-		      success: res => {
-		        const isfollowed = res.data.followed == 1 ? true : false // 1 已关注 0 未关注
-		        this.isfollowed = isfollowed
-		      },
-		      fail: error => {console.log(error, '获取是否关注失败!')}
-		    })
+			        method: "get",
+			        url: '/app/wechat/follow?openid=',
+			      	success: res => {
+				        const isfollowed = res.data.followed == 1 ? true : false // 1 已关注 0 未关注
+				        	this.isfollowed = isfollowed
+				        },
+			        fail: error => {console.log(error, '获取是否关注失败!')}
+			    })
 			})
 		},
 		destroyed () {
+			this.$store.commit("updateShowTitleImg", { showTitleImg:  false})
 		   if (localStorage.getItem("userNow")) {
 			   	localStorage.removeItem("userNow")
 			   	// this.$store.commit("updateUser", { userNow: '' });
@@ -649,7 +738,7 @@
 				},
 				showFollow: false, // 提示用户关注弹层
 				showActiondetail: false, // 是否显示更多活动详情信息
-				actiondetailBtn: false, // 是否显示更多活动详情信息按钮
+				actiondetailBtn: true, // 是否显示更多活动详情信息按钮
 				showJoinNotice: false, // 是否显示更多报名须知
 				joinnoticeBtn: false, // 是否显示更多报名须知按钮
 				showIntroduction: false, // 是否显示发起人介绍
@@ -667,7 +756,13 @@
 				actionList: [ "活动详情", "报名须知", "发起人介绍" ],
 				writeimg: require("~assets/pisco/write.png"),
 				moneyList: ["1", "5", "10", "66", "88"],
-				showmember: false
+				showmember: false,
+
+
+
+				showInput: -1,
+				formMsg: { answerContent: [] },
+				localUserName: '',
 			};
 		}
 	};
@@ -1026,13 +1121,46 @@
 						color: rgba(127, 127, 127, 1);
 						line-height: 1.42rem;
 					}
-					.time {
-						font-size: 0.83rem;
-						font-family: PingFang-SC-Medium;
-						font-weight: 500;
-						color: rgba(220, 220, 220, 1);
-						line-height: 1.17rem;
+					.reply {
+						line-height: 2.33rem;
+						padding: 0 1rem;
+						background:rgba(243,243,243,1);
+						margin: 1rem 0;
+						font-size:1rem;
+						.replyname {
+							color:rgba(0,0,0,1);
+						}
+						.replycontent {
+							color: #7f7f7f;
+							word-wrap: break-word;
+						}
+					}
+					.answer {
+						background: #eee;
+						padding-left: 1rem;
 						margin-top: 1rem;
+						display: flex;
+						input {
+							background: #eee;
+							border: none;
+							margin-left: 1rem;
+						}
+						input:focus {
+							outline: none;
+						}
+					}
+					.time {
+						font-size:1rem;
+						font-family:PingFang-SC-Medium;
+						font-weight:500;
+						color:rgba(220,220,220,1);
+						line-height:1.17rem;
+						margin-top: 1rem;
+						display: flex;
+						justify-content: space-between;
+						.cancel {
+							margin-right: 2rem;
+						}
 					}
 				}
 			}
@@ -1040,20 +1168,40 @@
 		.rightitem {
 			position: fixed;
 			right: 1rem;
-			top: 40%;
+			top: 35%;
 			.rightimg {
-				width: 4rem;
-				height: 4rem;
+				width: 5.2rem;
+				height: 5.2rem;
+				background: #fff;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				border-radius: 50%;
+				margin-top: 2rem;
 				img {
-					width: 100%;
+				width: 2.6rem;
+				height: 2.6rem;
+				}
+				.name {
+					font-size: 0.9rem;
 				}
 			}
 			.rightimg2 {
-				width: 4rem;
-				height: 4rem;
-				margin-top: 2rem;
+				width: 5.2rem;
+				height: 5.2rem;
+				background: #fff;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				border-radius: 50%;
 				img {
-					width: 100%;
+				width: 2.6rem;
+				height: 2.6rem;
+				}
+				.name {
+					font-size: 0.9rem;
 				}
 			}
 		}
